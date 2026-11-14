@@ -40,7 +40,7 @@ RATCHET_LOG yalnızca **gerçekten gözlenen** hataları listeler. Uydurma yoktu
 
 | Metrik                   | A Koşusu | B Koşusu |
 | ------------------------ | -------- | -------- |
-| Ajan tur sayısı          | —        | —        |
-| Commit sayısı            | —        | —        |
-| Sınır testleri yeşil mi? | ❌        | —        |
-| bin/kontrol yeşil mi?    | —        | —        |
+| Ajan tur sayısı          | 1 tur    | 1 tur    |
+| Commit sayısı            | 1        | 1        |
+| Sınır testleri yeşil mi? | ❌        | ✅        |
+| bin/kontrol yeşil mi?    | ❌        | ✅        |
