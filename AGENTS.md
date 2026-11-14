@@ -28,8 +28,12 @@ Gözlemlenen hataların dönüşüm tablosu için `RATCHET_LOG.md`'ye bakın.
 - Tek ifade ile sonuç dönen metod → **endless method** kullan (Ruby 3.0+):
 
   ```ruby
-  def burslu? = @durum == :burslu
+  def burslu? = @burslu
   ```
+
+- Durum sorgu metotları (`aktif?`, `donduruldu?`, `mezun?`) tek tek elle
+  yazılmaz; geçerli durumlar listesinden **`define_method`** ile üretilir.
+  `method_missing` ile dinamik ad yakalama **yasak** (bkz. § 2).
 
 - Block parametresi için `it` (Ruby 3.4+) tercih edilir:
 
@@ -70,10 +74,17 @@ Birleşik koşul (örn. `>= 4 && :burslu`) için her koşulu bağımsız test et
 ## 5 · Alan modeli sözleşmesi
 
 - `Ogrenci` sınıfı:
-  - Alanlar: `ad` (String), `durum` (Symbol), `devamsizlik` (Integer)
-  - `durum` yalnızca şu semboller: `:aktif`, `:pasif`, `:burslu`
+  - Alanlar: `ad` (String), `durum` (Symbol), `devamsizlik` (Integer), `burslu` (boolean)
+  - `durum` yalnızca şu semboller: `:aktif`, `:donduruldu`, `:mezun`
+    (ödev şartnamesi § 1). Geçersiz durum → `ArgumentError`.
+  - `devamsizlik` yalnızca **0..10** aralığında (ödev şartnamesi § 1).
+    Aralık dışı → `ArgumentError`.
+  - `burslu` burs durumunu tutan ayrı bir bayraktır; `durum` setinde yer almaz.
+    Özgün `:burs_kesilir` kuralı bunu kullanır.
   - Constructor keyword argümanlı:
-    `Ogrenci.new(ad:, durum: :aktif, devamsizlik: 0)`
+    `Ogrenci.new(ad:, durum: :aktif, devamsizlik: 0, burslu: false)`
+  - Durum sorguları (`aktif?`, `donduruldu?`, `mezun?`) `define_method` ile
+    `DURUMLAR` listesinden üretilir. `burslu?` ayrı bayraktan okunur.
 - `DevamsizlikKontrol` sınıfı:
   - Tek entry point: `DevamsizlikKontrol.kontrol(ogrenci)` → `Array<Symbol>`
   - Dönen semboller yalnızca şu kümeden: `{:riskli, :kaldi, :burs_kesilir}`

@@ -23,13 +23,19 @@ ruby bin/kontrol   # tüm kontroller: sürüm + sözdizim + testler
 
 ---
 
+## Model
+
+`Ogrenci`: `ad`, `durum` (`:aktif`, `:donduruldu`, `:mezun`), `devamsizlik`
+(0..10), `burslu` (boolean). Durum sorguları (`aktif?`, `donduruldu?`,
+`mezun?`) `define_method` ile üretilir; `method_missing` ve monkey patch yok.
+
 ## Kurallar
 
 | Kural | Koşul | Sembol |
 |-------|-------|--------|
 | Riskli | devamsızlık **>= 3** | `:riskli` |
 | Kaldı | devamsızlık **>= 4** | `:kaldi` |
-| Bursu kesilir (özgün kural) | devamsızlık **>= 4** **ve** durum **== :burslu** | `:burs_kesilir` |
+| Bursu kesilir (özgün kural) | devamsızlık **>= 4** **ve** `burslu` | `:burs_kesilir` |
 
 Giriş noktası: `DevamsizlikKontrol.kontrol(ogrenci)` → `Array<Symbol>`
 
@@ -75,8 +81,8 @@ Ajana aynı belirsiz görev verildi; ama bu kez önce `AGENTS.md` ve
 | Predicate metod (`?`) | Yok | Var ✅ |
 | Alan erişimi | `attr_accessor` | `attr_reader` ✅ |
 | Ajanın attığı commit | 1 | 1 |
-| Ajan tur sayısı (Antigravity) | 1 tur | 1 tur |
-| Projenin sabit testlerini geçer mi | ❌ | ✅ (15/15) |
+| Ajan tur sayısı (Antigravity) | 1 | 1 |
+| Projenin sabit testlerini geçer mi | ❌ | ✅ (18/18) |
 | `bin/kontrol` sonucu | yok / kırmızı | **yeşil** |
 
 ### Tablonun okunması
@@ -91,6 +97,17 @@ testlere bağlandığı için aynı tek commit doğru kodu üretti.
 engellemektir.** Bu, derste işlenen "doğrulama darboğazı" ve "test oracle
 problemi"nin doğrudan gözlemidir: ajana kendi işini kendi doğrulattığında,
 yanlış bir oracle yanlış kodu onaylar.
+
+### İkinci Ratchet Turu — Bağımsız Denetim
+
+B koşusundan sonra kod, **ikinci bir ajanla bağımsız denetime** sokuldu.
+Denetim, harness'ın kendisinde (`AGENTS.md` sözleşmesi) ödev şartnamesine göre
+üç boşluk buldu: durum setinin yanlış kurulması, durum sorgularının
+`define_method` yerine elle yazılması ve `devamsizlik` 0..10 aralığının
+doğrulanmaması. Üçü de düzeltildi ve `RATCHET_LOG.md`'de Tur 2 olarak
+kaydedildi. Bu, ratchet'in tek seferlik değil **sürekli** bir döngü olduğunu
+gösterir: doğrulama ayrı bir ajana devredildiğinde, ilk turda kaçan sözleşme
+boşlukları yakalanır.
 
 ---
 

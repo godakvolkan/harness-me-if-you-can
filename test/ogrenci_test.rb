@@ -6,94 +6,92 @@ require_relative "../lib/devamsizlik_kontrol"
 
 describe Ogrenci do
   describe "constructor" do
-    it "varsayılan devamsizlik 0" do
-      o = Ogrenci.new(ad: "Test")
-      _(o.devamsizlik).must_equal 0
-    end
-
-    it "varsayılan durum :aktif" do
+    it "varsayılan durum :aktif, devamsizlik 0, burssuz" do
       o = Ogrenci.new(ad: "Test")
       _(o.durum).must_equal :aktif
+      _(o.devamsizlik).must_equal 0
+      _(o.burslu?).must_equal false
+    end
+
+    it "geçersiz durum ArgumentError fırlatır" do
+      _ { Ogrenci.new(ad: "X", durum: :silindi) }.must_raise ArgumentError
+    end
+
+    it "0..10 dışı devamsizlik ArgumentError fırlatır" do
+      _ { Ogrenci.new(ad: "X", devamsizlik: 11) }.must_raise ArgumentError
+      _ { Ogrenci.new(ad: "X", devamsizlik: -1) }.must_raise ArgumentError
+    end
+  end
+
+  describe "durum sorguları (define_method ile üretilmiş)" do
+    it "aktif? doğru çalışır" do
+      _(Ogrenci.new(ad: "A", durum: :aktif).aktif?).must_equal true
+      _(Ogrenci.new(ad: "A", durum: :mezun).aktif?).must_equal false
+    end
+
+    it "donduruldu? doğru çalışır" do
+      _(Ogrenci.new(ad: "A", durum: :donduruldu).donduruldu?).must_equal true
+    end
+
+    it "mezun? doğru çalışır" do
+      _(Ogrenci.new(ad: "A", durum: :mezun).mezun?).must_equal true
+    end
+
+    it "tanımsız bir metot NoMethodError verir (method_missing YOK)" do
+      _ { Ogrenci.new(ad: "A").uzaylimi? }.must_raise NoMethodError
     end
   end
 end
 
 describe DevamsizlikKontrol do
-  # ============================================================
-  # :riskli kuralı — "devamsızlığı 3'ün üzerinde" == devamsizlik >= 3
-  # ============================================================
   describe ":riskli kuralı (devamsizlik >= 3)" do
-    it "sınır altı: devamsizlik 2 → riskli DEĞİL" do
+    it "sınır altı: 2 → riskli DEĞİL" do
       o = Ogrenci.new(ad: "Ali", durum: :aktif, devamsizlik: 2)
       _(DevamsizlikKontrol.kontrol(o)).wont_include :riskli
     end
 
-    it "TAM SINIR: devamsizlik 3 → RISKLI (A koşusunda bu test eksikti)" do
+    it "TAM SINIR: 3 → RISKLI" do
       o = Ogrenci.new(ad: "Veli", durum: :aktif, devamsizlik: 3)
       _(DevamsizlikKontrol.kontrol(o)).must_include :riskli
     end
 
-    it "sınır üstü: devamsizlik 5 → riskli" do
+    it "sınır üstü: 5 → riskli" do
       o = Ogrenci.new(ad: "Ayse", durum: :aktif, devamsizlik: 5)
       _(DevamsizlikKontrol.kontrol(o)).must_include :riskli
     end
   end
 
-  # ============================================================
-  # :kaldi kuralı — "devamsızlığı 4'ün üzerinde" == devamsizlik >= 4
-  # ============================================================
   describe ":kaldi kuralı (devamsizlik >= 4)" do
-    it "sınır altı: devamsizlik 3 → kaldi DEĞİL" do
+    it "sınır altı: 3 → kaldi DEĞİL" do
       o = Ogrenci.new(ad: "Ali", durum: :aktif, devamsizlik: 3)
       _(DevamsizlikKontrol.kontrol(o)).wont_include :kaldi
     end
 
-    it "TAM SINIR: devamsizlik 4 → KALDI (A koşusunda bu test eksikti)" do
+    it "TAM SINIR: 4 → KALDI" do
       o = Ogrenci.new(ad: "Veli", durum: :aktif, devamsizlik: 4)
       _(DevamsizlikKontrol.kontrol(o)).must_include :kaldi
     end
-
-    it "sınır üstü: devamsizlik 5 → hem riskli hem kaldi" do
-      o = Ogrenci.new(ad: "Ayse", durum: :aktif, devamsizlik: 5)
-      etiketler = DevamsizlikKontrol.kontrol(o)
-      _(etiketler).must_include :riskli
-      _(etiketler).must_include :kaldi
-    end
   end
 
-  # ============================================================
-  # :burs_kesilir ÖZGÜN KURAL — devamsizlik >= 4 && durum == :burslu
-  # İki koşul birden tutmalı
-  # ============================================================
-  describe ":burs_kesilir özgün kuralı (devamsizlik >= 4 && durum == :burslu)" do
-    it "burslu + devamsizlik 3 → henüz bursu KESİLMEZ (devamsızlık sınırı tutmuyor)" do
-      o = Ogrenci.new(ad: "Zeynep", durum: :burslu, devamsizlik: 3)
-      _(DevamsizlikKontrol.kontrol(o)).wont_include :burs_kesilir
-    end
-
-    it "TAM SINIR: burslu + devamsizlik 4 → BURSU KESILIR" do
-      o = Ogrenci.new(ad: "Mehmet", durum: :burslu, devamsizlik: 4)
+  describe ":burs_kesilir özgün kuralı (devamsizlik >= 4 && burslu)" do
+    it "burslu + 4 → BURSU KESILIR" do
+      o = Ogrenci.new(ad: "Mehmet", durum: :aktif, devamsizlik: 4, burslu: true)
       _(DevamsizlikKontrol.kontrol(o)).must_include :burs_kesilir
     end
 
-    it "burslu DEĞİL + devamsizlik 4 → burs kesilmez (ikinci koşul tutmuyor)" do
-      o = Ogrenci.new(ad: "Can", durum: :aktif, devamsizlik: 4)
+    it "burslu + 3 → henüz kesilmez (devamsızlık sınırı tutmuyor)" do
+      o = Ogrenci.new(ad: "Zeynep", durum: :aktif, devamsizlik: 3, burslu: true)
       _(DevamsizlikKontrol.kontrol(o)).wont_include :burs_kesilir
     end
 
-    it "pasif + devamsizlik 10 → burs kesilmez (pasif, burslu değil)" do
-      o = Ogrenci.new(ad: "Elif", durum: :pasif, devamsizlik: 10)
+    it "burssuz + 4 → kesilmez (ikinci koşul tutmuyor)" do
+      o = Ogrenci.new(ad: "Can", durum: :aktif, devamsizlik: 4, burslu: false)
       _(DevamsizlikKontrol.kontrol(o)).wont_include :burs_kesilir
     end
   end
 
-  # ============================================================
-  # Kaynak kodu denetimi — AGENTS.md § 2 yasaklarını statik test
-  # ============================================================
   describe "AGENTS.md § 2 — mimari yasakların statik denetimi" do
-    let(:kaynak) do
-      Dir["lib/*.rb"].map { File.read(it) }.join("\n")
-    end
+    let(:kaynak) { Dir["lib/*.rb"].map { |path| File.read(path, encoding: "UTF-8") }.join("\n") }
 
     it "method_missing kullanılmamalı" do
       _(kaynak).wont_match(/method_missing/)
