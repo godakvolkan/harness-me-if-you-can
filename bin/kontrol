@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+# bin/kontrol — her commit öncesi çalışacak doğrulama kancası.
+# Çağrı: `ruby bin/kontrol` (Windows, macOS, Linux hepsinde aynı)
+# Çıkış kodu 0 → yeşil; başka değer → kırmızı, commit atmayın.
+
+puts "==> Ruby sürümü kontrolü"
+unless RUBY_VERSION.start_with?("3.4")
+  warn "HATA: Ruby 3.4 gerekli; kurulu sürüm: #{RUBY_VERSION}"
+  exit 1
+end
+
+puts "==> Kaynak dosyaların sözdizim kontrolü"
+Dir["lib/*.rb"].each do |f|
+  ok = system("ruby", "-c", f, out: File::NULL)
+  unless ok
+    warn "HATA: #{f} sözdiziminde bozukluk var"
+    exit 2
+  end
+end
+
+puts "==> Minitest koşusu"
+ok = system("ruby", "-Ilib", "-Itest", "test/ogrenci_test.rb")
+unless ok
+  warn "HATA: testler kırmızı"
+  exit 3
+end
+
+puts "==> OK — tüm kontroller yeşil"
+exit 0
