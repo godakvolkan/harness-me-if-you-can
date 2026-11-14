@@ -1,0 +1,30 @@
+{
+  "proje": "harness-me-if-you-can",
+  "ajan": "Gemini 3.8 Flash (Antigravity)",
+  "tarih": "2026-11-14",
+  "a_kosusu": {
+    "rehber": "yok (AGENTS.md okutulmadı)",
+    "ajan_commit_sayisi": 1,
+    "ajan_tur_sayisi": 1,
+    "riskli_sinir": "> 3 (YANLIŞ — tam 3 kaçtı)",
+    "kaldi_sinir": "> 4 (YANLIŞ — tam 4 kaçtı)",
+    "endless_method": false,
+    "predicate_metod": false,
+    "attr": "attr_accessor",
+    "kendi_testleri": "yeşil ama yanlış spec'i teyit ediyor",
+    "bizim_testlerimizden_gecer_mi": false
+  },
+  "b_kosusu": {
+    "rehber": "AGENTS.md + RATCHET_LOG.md okundu",
+    "ajan_commit_sayisi": 1,
+    "ajan_tur_sayisi": 1,
+    "riskli_sinir": ">= 3 (DOĞRU)",
+    "kaldi_sinir": ">= 4 (DOĞRU)",
+    "endless_method": true,
+    "predicate_metod": true,
+    "attr": "attr_reader",
+    "bin_kontrol": "yeşil",
+    "bizim_testlerimizden_gecer_mi": true,
+    "test_sonucu": "15 runs, 30 assertions, 0 failures"
+  }
+}
