@@ -81,7 +81,7 @@ Ajana aynı belirsiz görev verildi; ama bu kez önce `AGENTS.md` ve
 | Predicate metod (`?`) | Yok | Var ✅ |
 | Alan erişimi | `attr_accessor` | `attr_reader` ✅ |
 | Ajanın attığı commit | 1 | 1 |
-| Ajan tur sayısı (Antigravity) | 1 | 1 |
+| Ajan tur sayısı (Antigravity) | _[doldurulacak]_ | _[doldurulacak]_ |
 | Projenin sabit testlerini geçer mi | ❌ | ✅ (18/18) |
 | `bin/kontrol` sonucu | yok / kırmızı | **yeşil** |
 
